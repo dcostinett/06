@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ======================================================================= -->
+<!-- For each assignment rename this project, this will alter the names of   -->
+<!-- generated jar and zip files. You also need to modify the student.name   -->
+<!-- property, these two adjustments will allow the build file to properly   -->
+<!-- build the zip file for submission.                                      -->
+<!-- The project name should be 01, 02, 03, etc.                             -->
+<!-- ======================================================================= -->
+<project name="06" default="jar" basedir=".">
+
+  <!-- ===================================================================== -->
+  <!-- The following needs to be modified to match your name , it should     -->
+  <!-- take the form: LastFM (last name, first initial, middle initial)      -->
+  <!-- ===================================================================== -->
+  <property name="student.name" value="CostinettDR"/>
+
+  <!-- ===================================================================== -->
+  <!-- The following needs to be modified to match the name of your "main"   -->
+  <!-- class.                                                                -->
+  <!-- ===================================================================== -->
+  <property name="main.class" value="Assignment${ant.project.name}"/>
+
+  <!-- ===================================================================== -->
+  <!-- The following are global properties set based on directory structure  -->
+  <!--      classes     -> compiled java classes                             -->
+  <!--      dist        -> generated runtime, test, and src jars             -->
+  <!--      docs        -> generated junit reports and javadoc apis          -->
+  <!--      lib         -> any 3rd party libraries like jdbc drivers         -->
+  <!--      src         -> java source class files                           -->
+  <!-- ===================================================================== -->
+  <property name="path.classes"  value="classes"/>
+  <property name="path.dist"     value="dist"/>
+  <property name="path.javadocs" value="docs/api"/>
+  <property name="path.lib"      value="../lib"/>
+  <property name="path.src"      value="src"/>
+  <property name="path.test"      value="test"/>
+  <property name="path.project.jar"
+            value="${path.dist}/cp125-${ant.project.name}.jar"/>
+
+  <mkdir dir="${path.classes}"  description="create classes dir if need to" />
+  <mkdir dir="${path.dist}"     description="create dist dir if need to" />
+  <mkdir dir="${path.javadocs}" description="create docs dir if need to" />
+  <mkdir dir="test"     description="create test dir if need to" />
+
+  <!-- ===================================================================== -->
+  <!-- Setup a classpath id                                                  -->
+  <!-- ===================================================================== -->
+  <path id="path.class">
+    <pathelement location="."/>
+    <fileset dir="${path.lib}" includes="*.jar"/>
+    <fileset dir="${path.dist}" includes="*.jar"/>
+  </path>
+
+  <!-- ===================================================================== -->
+  <!-- Compile the project based on java source path - no junit tests to     -->
+  <!--preform a clean compile must execute the clean target 1st.             -->
+  <!-- ===================================================================== -->
+  <target name="compile" description="Compiles sources">
+    <mkdir dir="${path.classes}"/>
+    <javac classpathref="path.class"
+           destdir="${path.classes}"
+           debug="on"
+           deprecation="on"
+           includeantruntime="false">
+     <src path="${path.src}"/>
+     <src path="${path.test}"/>
+     <compilerarg value="-Xlint"/>   
+    </javac>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- The following target will generate the javadoc apis, this excluding   -->
+  <!-- the junit test cases.                                                 -->
+  <!-- ===================================================================== -->
+  <target name="javadoc" depends="compile"
+          description="Generate Javadoc">
+    <javadoc destdir="${path.javadocs}"
+             classpathref="path.class"
+             author="true"
+             version="true"
+             access="package"
+             windowtitle="${ant.project.name} API">
+
+      <fileset dir="${path.src}" defaultexcludes="yes">
+          <include name="**/*.java"/>
+          <exclude name="test/**"/>
+	  <exclude name="**/*Test.java"/>
+          <exclude name="**/.*"/>
+      </fileset>
+      <doctitle><![CDATA[<h1>${student.name}${ant.project.name}</h1>]]></doctitle>
+    </javadoc>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Builds the project, this encompasses all targets defined above this.  -->
+  <!-- If you add a target above this line it should be part of the normal   -->
+  <!-- build and should be included with this target.                        -->
+  <!-- ===================================================================== -->
+  <target name="build" depends="javadoc"
+          description="Rebuilds project"/>
+
+  <!-- ===================================================================== -->
+  <!-- Create an project jar file.                                           -->
+  <!-- ===================================================================== -->
+  <target name="jar" depends="compile"
+          description="jar the classes dirs">
+    <jar destfile="${path.project.jar}"
+         basedir="${path.classes}">
+    </jar>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Create a source backup excluding classes, docs and the dist directory -->
+  <!-- ===================================================================== -->
+  <target name="package" depends="jar"
+          description="Package this project for submission.">
+    <jar destfile="${path.dist}/${student.name}${ant.project.name}.jar">
+      <fileset dir="${basedir}">
+        <include name="${path.src}/**"/>
+        <include name="${path.test}/**"/>
+        <include name="build.xml"/>
+	<include name="**/*.properties"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Run the class specified in the "main.class" property.                 -->
+  <!-- ===================================================================== -->
+  <target name="run" depends="jar"
+          description="Runs the class specified in the 'main.class' property">
+    <java classname="${main.class}" classpathref="path.class" fork="yes"/>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Run the JUnit tests                                                   -->
+  <!-- ===================================================================== -->
+  <target name="test" depends="jar"
+          description="Runs the JUnit test classes in the 'test' package.">
+    <junit haltonfailure="yes">
+      <formatter type="plain" usefile="false"/>
+      <classpath>
+        <path refid="path.class"/>
+      </classpath>
+      <batchtest fork="yes">
+         <fileset dir="${path.src}">
+           <include name="**/*Test.java"/>
+         </fileset>
+         <fileset dir="test">
+           <include name="**/*Test.java"/>
+         </fileset>
+       </batchtest>
+    </junit>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Dump the database                                                     -->
+  <!-- ===================================================================== -->
+  <target name="dump_db"
+          description="Dump the database">
+    <sql driver="com.mysql.jdbc.Driver"
+         url="jdbc:mysql://localhost/scgDB"
+         userid="student"
+         password="student"
+         print="yes"
+         classpathref="path.class">
+           SELECT * 
+             FROM clients
+            ORDER BY id;
+           SELECT * 
+             FROM non_billable_accounts
+            ORDER BY name;
+           SELECT * 
+             FROM consultants
+            ORDER BY id;
+           SELECT * 
+             FROM skills
+            ORDER BY name;
+           SELECT * 
+             FROM timecards
+            ORDER BY id;
+           SELECT * 
+             FROM billable_hours
+            ORDER BY id;
+           SELECT * 
+             FROM non_billable_hours
+            ORDER BY id;
+    </sql>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Create the database                                                   -->
+  <!-- ===================================================================== -->
+  <target name="setup_db"
+          description="Initialize the database">
+    <sql driver="com.mysql.jdbc.Driver"
+         url="jdbc:mysql://localhost/"
+         userid="student"
+         password="student"
+         print="yes"
+         classpathref="path.class">
+           DROP DATABASE IF EXISTS scgDB;
+           CREATE DATABASE scgDB;
+           USE scgDB;
+
+           CREATE TABLE clients (
+             id INTEGER AUTO_INCREMENT,
+             name VARCHAR(30) NOT NULL,
+             street VARCHAR(30) NOT NULL,
+             city VARCHAR(30) NOT NULL,
+             state CHAR(2) NOT NULL,
+             postal_code VARCHAR(10),
+             contact_last_name VARCHAR(30),
+             contact_first_name VARCHAR(30),
+             contact_middle_name VARCHAR(30),
+             PRIMARY KEY (id),
+             UNIQUE KEY (name)
+           );
+
+          CREATE TABLE non_billable_accounts (
+            name VARCHAR(30) NOT NULL,
+            PRIMARY KEY (name)
+          );
+
+          CREATE TABLE consultants (
+            id INTEGER AUTO_INCREMENT,
+            last_name VARCHAR(30) NOT NULL,
+            first_name VARCHAR(30) NOT NULL,
+            middle_name VARCHAR(30),
+            PRIMARY KEY (id),
+            UNIQUE KEY (last_name, first_name, middle_name)
+         );
+
+         CREATE TABLE skills (
+           name VARCHAR(30) NOT NULL,
+           rate INTEGER NOT NULL,
+           PRIMARY KEY (name)
+         );
+
+         CREATE TABLE timecards (
+           id INTEGER AUTO_INCREMENT,
+           consultant_id INTEGER NOT NULL,
+           start_date DATE NOT NULL,
+           PRIMARY KEY (id),
+           FOREIGN KEY (consultant_id) references consultants(id),
+           UNIQUE KEY (consultant_id, start_date)
+         );
+
+         CREATE TABLE billable_hours (
+           id INTEGER AUTO_INCREMENT,
+           client_id INTEGER NOT NULL,
+           timecard_id INTEGER NOT NULL,
+           date DATE NOT NULL,
+           skill VARCHAR(30) NOT NULL,
+           hours INTEGER NOT NULL,
+           PRIMARY KEY (id),
+           FOREIGN KEY (client_id) references clients(id),
+           FOREIGN KEY (skill) references skills(name),
+           FOREIGN KEY (timecard_id) references timecards(id)
+         );
+
+         CREATE TABLE non_billable_hours (
+           id INTEGER AUTO_INCREMENT,
+           account_name VARCHAR(30) NOT NULL,
+           timecard_id INTEGER NOT NULL,
+           date DATE NOT NULL,
+           hours INTEGER NOT NULL,
+           PRIMARY KEY (id),
+           FOREIGN KEY (account_name) references non_billable_accounts(name),
+           FOREIGN KEY (timecard_id) references timecards(id)
+         );
+
+         INSERT INTO skills (name, rate) VALUES('PROJECT_MANAGER', 250);
+         INSERT INTO skills (name, rate) VALUES('SYSTEM_ARCHITECT', 200);
+         INSERT INTO skills (name, rate) VALUES ('SOFTWARE_ENGINEER', 150);
+         INSERT INTO skills (name, rate) VALUES ('SOFTWARE_TESTER', 100);
+         INSERT INTO skills (name, rate) VALUES ('UNKNOWN_SKILL', 0);
+         INSERT INTO non_billable_accounts (name) VALUES ('VACATION');
+         INSERT INTO non_billable_accounts (name) VALUES ('SICK_LEAVE');
+         INSERT INTO non_billable_accounts (name) VALUES ('BUSINESS_DEVELOPMENT');
+
+    </sql>
+  </target>
+
+  <!-- ===================================================================== -->
+  <!-- Clean the database                                                    -->
+  <!-- ===================================================================== -->
+    <target name="clean_db"
+            description="Dump the database">
+      <sql driver="com.mysql.jdbc.Driver"
+           url="jdbc:mysql://localhost/scgDB"
+           userid="student"
+           password="student"
+           print="yes"
+           classpathref="path.class">
+             DELETE
+               FROM non_billable_hours;
+             DELETE
+               FROM billable_hours;
+             DELETE
+               FROM timecards;
+             DELETE
+                FROM clients;
+             DELETE
+               FROM consultants;
+
+     </sql>
+   </target>
+
+  <!-- ===================================================================== -->
+  <!-- Removes disposable files and directories                              -->
+  <!-- ===================================================================== -->
+  <target name="clean">
+    <delete includeemptydirs="true">
+    <fileset dir="${basedir}">
+      <include name="${path.classes}/**/*"/>
+      <include name="${path.javadocs}/**/*"/>
+      <include name="${path.dist}/**/*"/>
+    </fileset>
+    </delete>
+  </target>
+
+</project>
