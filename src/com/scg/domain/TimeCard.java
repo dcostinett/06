@@ -193,7 +193,21 @@ public class TimeCard implements Comparable<TimeCard>, Serializable {
     }
 
     @Override
-    public int compareTo(TimeCard o) {
-        return consultant.compareTo(o.getConsultant());
+    public int compareTo(final TimeCard o) {
+        int diff = 0;
+        if (this == o) return diff;
+
+        diff = consultant.compareTo(o.consultant);
+        if (diff == 0) {
+            diff = billableHours - o.billableHours;
+        }
+        if (diff == 0) {
+            diff = totalNonBillableHours - o.totalNonBillableHours;
+        }
+        if (diff == 0) {
+            diff = weekStartingDay.compareTo(o.weekStartingDay);
+        }
+        return diff;
     }
+
 }

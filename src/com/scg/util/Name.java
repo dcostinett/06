@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Encapsulates the first, middle and last name of a person.
  */
 @SuppressWarnings({"serial", "unchecked"})
-public class Name implements Serializable {
+public class Name implements Serializable, Comparable<Name> {
 
     private String firstName;
     private String middleName;
@@ -140,5 +140,20 @@ public class Name implements Serializable {
         }
 
         return sb.toString();
+    }
+
+
+    @Override
+    public int compareTo(final Name other) {
+        int diff = 0;
+        diff = lastName.compareTo(other.lastName);
+        if (diff == 0) {
+            diff = firstName.compareTo(other.firstName);
+        }
+        if (diff == 0) {
+            diff = middleName.compareTo(other.middleName);
+        }
+
+        return diff;
     }
 }

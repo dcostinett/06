@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Time: 2:05 PM
  */
 @SuppressWarnings({"serial", "unchecked"})
-public class Address implements Serializable {
+public class Address implements Serializable, Comparable<Address> {
     private final String streetNumber;
     private final String city;
     private final StateCode state;
@@ -93,4 +93,22 @@ public class Address implements Serializable {
 
         return sb.toString();
     }
+
+    @Override
+    public int compareTo(final Address o) {
+        int diff = 0;
+        diff = state.compareTo(o.state);
+        if (diff == 0) {
+            diff = city.compareTo(o.city);
+        }
+        if (diff == 0) {
+            diff = postalCode.compareTo(o.postalCode);
+        }
+        if (diff == 0) {
+            diff = streetNumber.compareTo(o.streetNumber);
+        }
+
+        return diff;
+    }
+
 }
