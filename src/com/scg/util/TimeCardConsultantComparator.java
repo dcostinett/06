@@ -24,6 +24,6 @@ public class TimeCardConsultantComparator implements Comparator<TimeCard>, Seria
      * greater than the second.
      */
     public int compare(TimeCard lhs, TimeCard rhs) {
-        return lhs.getConsultant().getName().toString().compareTo(rhs.getConsultant().getName().toString());
+        return lhs.getConsultant().getName().compareTo(rhs.getConsultant().getName());
     }
 }

@@ -12,7 +12,7 @@ import java.io.Serializable;
  * or business development.
  */
 @SuppressWarnings({"serial", "unchecked"})
-public enum NonBillableAccount implements Account, Comparable<NonBillableAccount>, Serializable {
+public enum NonBillableAccount implements Account,Serializable {
     SICK_LEAVE("Sick Leave"),
     VACATION("Vacation"),
     BUSINESS_DEVELOPMENT("Business Development");

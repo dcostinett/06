@@ -199,10 +199,10 @@ public class TimeCard implements Comparable<TimeCard>, Serializable {
 
         diff = consultant.compareTo(o.consultant);
         if (diff == 0) {
-            diff = billableHours - o.billableHours;
+            diff = new Integer(billableHours).compareTo(o.billableHours);
         }
         if (diff == 0) {
-            diff = totalNonBillableHours - o.totalNonBillableHours;
+            diff = new Integer(totalNonBillableHours).compareTo(o.totalNonBillableHours);
         }
         if (diff == 0) {
             diff = weekStartingDay.compareTo(o.weekStartingDay);

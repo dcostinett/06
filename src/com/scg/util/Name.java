@@ -146,12 +146,19 @@ public class Name implements Serializable, Comparable<Name> {
     @Override
     public int compareTo(final Name other) {
         int diff = 0;
-        diff = lastName.compareTo(other.lastName);
+        diff = (lastName == null)
+                ? ((other.lastName == null) ? 0 : 1)
+                : lastName.compareTo(other.lastName);
+
         if (diff == 0) {
-            diff = firstName.compareTo(other.firstName);
-        }
-        if (diff == 0) {
-            diff = middleName.compareTo(other.middleName);
+            diff = (firstName == null)
+                    ? ((other.firstName == null) ? 0 : 1)
+                    : firstName.compareTo(other.firstName);
+            if (diff == 0) {
+                diff = (middleName == null)
+                        ? ((other.middleName == null) ? 0 : 1)
+                        : middleName.compareTo(other.middleName);
+            }
         }
 
         return diff;
