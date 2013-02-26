@@ -71,14 +71,13 @@ public class HumanResourceManager {
         }
     }
 
+
     /**
      * Fires a voluntary termination event for the staff consultant.
      * @param c - the consultant resigning
      */
     public void acceptResignation(Consultant c) {
-        for (TerminationListener terminator : terminators.getListeners(TerminationListener.class)) {
-            terminator.voluntaryTermination(new TerminationEvent(this, c, true));
-        }
+        fireTerminationEvent(new TerminationEvent(this, c, true));
     }
 
     /**
@@ -86,8 +85,22 @@ public class HumanResourceManager {
      * @param c - the consultant being terminated
      */
     public void terminate(Consultant c) {
+        fireTerminationEvent(new TerminationEvent(this, c, false));
+    }
+
+    /**
+     * Fires a termination event
+     * @param event - the termination event
+     */
+    private void fireTerminationEvent(final TerminationEvent event) {
+        //this method gets called by the acceptResignation & terminate events in order to
+        // have the list extraction code only in one place.
         for (TerminationListener terminator : terminators.getListeners(TerminationListener.class)) {
-            terminator.forcedTermination(new TerminationEvent(this, c, false));
+            if (event.isVoluntary()) {
+                terminator.voluntaryTermination(event);
+            } else {
+                terminator.forcedTermination(event);
+            }
         }
     }
 
