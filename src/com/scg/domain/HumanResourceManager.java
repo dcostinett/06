@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 public class HumanResourceManager {
 
     private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-    List<TerminationListener> terminators = new ArrayList<TerminationListener>();
+    private EventListenerList terminators = new EventListenerList();
 
     private static final Logger LOGGER = Logger.getLogger("HumanResourceManager.class");
 
@@ -76,7 +76,7 @@ public class HumanResourceManager {
      * @param c - the consultant resigning
      */
     public void acceptResignation(Consultant c) {
-        for (TerminationListener terminator : terminators) {
+        for (TerminationListener terminator : terminators.getListeners(TerminationListener.class)) {
             terminator.voluntaryTermination(new TerminationEvent(this, c, true));
         }
     }
@@ -86,7 +86,7 @@ public class HumanResourceManager {
      * @param c - the consultant being terminated
      */
     public void terminate(Consultant c) {
-        for (TerminationListener terminator : terminators) {
+        for (TerminationListener terminator : terminators.getListeners(TerminationListener.class)) {
             terminator.forcedTermination(new TerminationEvent(this, c, false));
         }
     }
@@ -96,7 +96,7 @@ public class HumanResourceManager {
      * @param l - the listener to add
      */
     public void addTerminationListener(TerminationListener l) {
-        terminators.add(l);
+        terminators.add(TerminationListener.class, l);
     }
 
     /**
@@ -104,6 +104,6 @@ public class HumanResourceManager {
      * @param l - the listener to remove
      */
     public void removeTerminationListener(TerminationListener l) {
-        terminators.remove(l);
+        terminators.remove(TerminationListener.class, l);
     }
 }
